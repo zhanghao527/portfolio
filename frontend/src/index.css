@@ -1,0 +1,379 @@
+/* ── Reset ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body, #root {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #333;
+  background: #c8c3bb;
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(0,0,0,0.06) 0%, transparent 50%);
+}
+
+/* ── App ── */
+.app {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Book container (holds book + bookmarks) ── */
+.book-container {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  height: calc(100vh - 80px);
+  max-height: 820px;
+  /* Leave space on both sides for bookmarks */
+  margin: 0 52px;
+}
+
+/* ── Book ── */
+.book {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.1),
+    0 8px 24px rgba(0,0,0,0.12),
+    0 20px 60px rgba(0,0,0,0.08),
+    inset 0 0 0 1px rgba(0,0,0,0.04);
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+/* ── Bookmarks ── */
+.bookmark {
+  position: absolute;
+  width: 40px;
+  padding: 10px 4px;
+  border: none;
+  font-size: 0.72rem;
+  font-family: inherit;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 2px;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s, color 0.2s, width 0.2s;
+}
+
+.bookmark-right {
+  right: -44px;
+  border-radius: 0 6px 6px 0;
+  background: #e8e4dc;
+  color: #999;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.08);
+}
+
+.bookmark-right:hover {
+  background: #ddd8cf;
+  color: #666;
+  width: 46px;
+}
+
+.bookmark-right.bookmark-active {
+  background: #fffef8;
+  color: #555;
+  font-weight: 600;
+  width: 46px;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+}
+
+.bookmark-left {
+  left: -44px;
+  border-radius: 6px 0 0 6px;
+  background: #ddd8cf;
+  color: #aaa;
+  box-shadow: -2px 2px 4px rgba(0,0,0,0.08);
+}
+
+.bookmark-left:hover {
+  background: #d4cfc6;
+  color: #777;
+  width: 46px;
+}
+
+.bookmark-moving {
+  background: #fffef8;
+  color: #555;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  pointer-events: none;
+}
+
+/* ── Page layer ── */
+.page-layer {
+  position: absolute;
+  inset: 0;
+  background: #fffef8;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Subtle paper lines */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 31px,
+      rgba(0,0,0,0.012) 31px,
+      rgba(0,0,0,0.012) 32px
+    );
+  will-change: clip-path;
+  transition: clip-path 0s;
+}
+
+/* ── Canvas overlay ── */
+.flip-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ── Paper back mirror ── */
+.page-back-clip {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: clip-path;
+  /* Don't clip overflow — let the transformed child render fully, 
+     then clip-path cuts it to the back region */
+}
+
+.page-back-mirror {
+  position: absolute;
+  inset: 0;
+  opacity: 0.15;
+  pointer-events: none;
+  background: transparent;
+}
+
+/* ── Cover page ── */
+.cover-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
+}
+
+.cover-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.cover-avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8e4dc, #d4cfc6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #8a8580;
+  margin-bottom: 20px;
+}
+
+.cover-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  letter-spacing: 2px;
+  margin-bottom: 0;
+}
+
+.cover-divider {
+  width: 40px; height: 2px;
+  background: #d4cfc6;
+  margin: 16px 0;
+  border-radius: 1px;
+}
+
+.cover-desc {
+  font-size: 0.9rem;
+  color: #999;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+.cover-bio {
+  font-size: 0.85rem;
+  color: #aaa;
+  line-height: 1.8;
+  margin-bottom: 24px;
+  max-width: 320px;
+}
+
+.cover-links {
+  display: flex; gap: 12px;
+}
+
+.cover-link {
+  font-size: 0.75rem;
+  color: #b0a89c;
+  padding: 4px 14px;
+  border: 1px solid #e0dcd4;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.cover-link:hover {
+  color: #777;
+  border-color: #ccc;
+  background: rgba(0,0,0,0.02);
+}
+
+.cover-flip-hint {
+  position: absolute;
+  bottom: 20px;
+  right: 28px;
+  font-size: 0.72rem;
+  color: #ccc;
+  letter-spacing: 1px;
+  animation: hintPulse 2s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.5; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(4px); }
+}
+
+/* ── Page body ── */
+.page-body {
+  flex: 1;
+  padding: 44px 40px 20px;
+  overflow-y: auto;
+}
+
+.page-num {
+  text-align: center;
+  padding: 8px 0 16px;
+  font-size: 0.7rem;
+  color: #c8c0b4;
+  letter-spacing: 2px;
+}
+
+/* ── Typography ── */
+.page-body h1 {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 0.88rem;
+  color: #aaa;
+}
+
+.divider {
+  width: 36px; height: 2px;
+  background: #e0dcd4;
+  margin: 14px 0 22px;
+  border-radius: 1px;
+}
+
+/* ── Project cards ── */
+.project-grid {
+  display: flex; flex-direction: column;
+  gap: 10px;
+}
+
+.project-card {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: #fff;
+  border: 1px solid #f0ece4;
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.project-card:hover {
+  border-color: #e0dcd4;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.card-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  background: #faf8f2;
+  border-radius: 8px;
+}
+
+.project-card h3 { font-size: 0.9rem; font-weight: 600; color: #222; margin-bottom: 2px; }
+.project-card span { font-size: 0.78rem; color: #aaa; line-height: 1.4; }
+
+/* ── Tech tags ── */
+.tech-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.tech-tag {
+  background: #fff;
+  border: 1px solid #ece8e0;
+  border-radius: 16px;
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.tech-tag:hover { background: #f5f3ee; color: #333; border-color: #ddd; }
+
+/* ── Blog list ── */
+.blog-list { display: flex; flex-direction: column; gap: 10px; }
+
+.blog-item {
+  background: #fff;
+  border: 1px solid #f0ece4;
+  border-radius: 10px;
+  padding: 14px 18px;
+  transition: border-color 0.2s;
+}
+
+.blog-item:hover { border-color: #e0dcd4; }
+
+.blog-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+
+.blog-tag {
+  font-size: 0.66rem;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: #f0ece4;
+  color: #998;
+}
+
+.blog-date { font-size: 0.7rem; color: #ccc; }
+
+.blog-item h3 { font-size: 0.9rem; font-weight: 600; color: #222; }
+
+/* ── Bottom bar ── */
+.bottom-bar {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.dots { display: flex; gap: 8px; }
+
+.dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.dot-on { background: rgba(255,255,255,0.7); transform: scale(1.3); }
