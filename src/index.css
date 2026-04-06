@@ -1,0 +1,134 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0a0a0a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #e0e0e0;
+}
+
+/* ── Rotating world container ── */
+.world {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center center;
+  position: relative;
+}
+
+/* ── Each page section ── */
+.page-section {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center center;
+  pointer-events: none;
+  opacity: 0;
+}
+.page-section.active {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.page-inner {
+  max-width: 800px;
+  width: 90%;
+  padding: 40px;
+}
+
+.page-inner h1 {
+  font-size: 2.8rem;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #00f0ff, #7b61ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.page-inner p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #999;
+  margin-bottom: 24px;
+}
+
+/* ── Project cards ── */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.project-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 24px;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.project-card:hover {
+  border-color: #7b61ff;
+  transform: translateY(-4px);
+}
+.project-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: #e0e0e0;
+}
+.project-card span {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* ── Tech stack tags ── */
+.tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.tech-tag {
+  background: rgba(123, 97, 255, 0.12);
+  border: 1px solid rgba(123, 97, 255, 0.3);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  color: #b8a9ff;
+  transition: background 0.3s;
+}
+.tech-tag:hover {
+  background: rgba(123, 97, 255, 0.25);
+}
+
+/* ── Blog list ── */
+.blog-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.blog-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 20px 24px;
+  transition: border-color 0.3s;
+}
+.blog-item:hover {
+  border-color: #00f0ff;
+}
+.blog-item h3 {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+  color: #e0e0e0;
+}
+.blog-item span {
+  font-size: 0.8rem;
+  color: #555;
+}
