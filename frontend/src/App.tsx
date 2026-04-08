@@ -128,13 +128,13 @@ export default function App() {
 
   // For the moving bookmark: mirror its original position through the fold line
   // so it appears on the flipped paper's edge, rotated to match the fold angle
-  const getMovingStyle = (i: number): React.CSSProperties => {
+  const getMovingStyle = (i: number): { style: React.CSSProperties; textRotate: number } => {
     const bookEl = containerRef.current
-    if (!bookEl) return { top: `${80 + i * 52}px`, right: '-44px' }
+    if (!bookEl) return { style: { top: `${40 + i * 58}px`, right: '-44px' }, textRotate: 0 }
     const rect = bookEl.getBoundingClientRect()
     const w = rect.width, h = rect.height
-    const baseTop = 80 + i * 52
-    const bmCenterY = baseTop + 25
+    const baseTop = 40 + i * 58
+    const bmH = 50 // bookmark height
 
     const { finger, corner } = state
     const origin = (() => {
@@ -146,52 +146,87 @@ export default function App() {
       }
     })()
 
-    // Fold line: midpoint of finger↔origin, perpendicular to finger→origin
-    const mid = { x: (finger.x + origin.x) / 2, y: (finger.y + origin.y) / 2 }
-    const foldDirX = -(origin.y - finger.y) // perpendicular direction
-    const foldDirY = origin.x - finger.x
-
-    // Find where fold line crosses y = bmCenterY
-    // P = mid + t * foldDir => P.y = mid.y + t * foldDirY = bmCenterY
-    let foldX: number
-    if (Math.abs(foldDirY) > 0.001) {
-      const t = (bmCenterY - mid.y) / foldDirY
-      foldX = mid.x + t * foldDirX
-    } else {
-      foldX = mid.x
-    }
-
-    // foldX is where the fold line is — that's the edge of the remaining page.
-    // The flipped paper's edge is the MIRROR of the original right edge about the fold line.
     const isForward = direction === 'forward'
-    const origEdgeX = isForward ? w : 0
-    const mirrorEdgeX = 2 * foldX - origEdgeX
+    const edgeX = isForward ? w : 0
 
-    // If fold hasn't reached this bookmark's y-level yet, keep it at original position
-    if (isForward && foldX >= w) {
-      return { top: `${baseTop}px`, right: '-44px', left: 'auto', transition: 'none' }
+    // Two endpoints of the bookmark on the original page edge
+    const topPt = { x: edgeX, y: baseTop }
+    const botPt = { x: edgeX, y: baseTop + bmH }
+
+    // Fold line
+    const mid = { x: (finger.x + origin.x) / 2, y: (finger.y + origin.y) / 2 }
+    const nx = origin.x - finger.x, ny = origin.y - finger.y
+    const nLen = Math.sqrt(nx * nx + ny * ny) || 1
+    const ux = nx / nLen, uy = ny / nLen
+
+    // Small progress → keep at original position
+    if (progress < 0.03) {
+      if (isForward) return { style: { top: `${baseTop}px`, right: '-44px', left: 'auto', borderRadius: '0 6px 6px 0', transition: 'none' }, textRotate: 0 }
+      else return { style: { top: `${baseTop}px`, left: '-44px', right: 'auto', borderRadius: '6px 0 0 6px', transition: 'none' }, textRotate: 0 }
     }
-    if (!isForward && foldX <= 0) {
-      return { top: `${baseTop}px`, left: '-44px', right: 'auto', transition: 'none' }
+
+    // Check if fold has reached the bookmark
+    const foldDirX = -(origin.y - finger.y)
+    const foldDirY = origin.x - finger.x
+    const midY = (topPt.y + botPt.y) / 2
+    if (Math.abs(foldDirY) > 0.001) {
+      const t = (midY - mid.y) / foldDirY
+      const foldXHere = mid.x + t * foldDirX
+      if (isForward && foldXHere > w) return { style: { top: `${baseTop}px`, right: '-44px', left: 'auto', borderRadius: '0 6px 6px 0', transition: 'none' }, textRotate: 0 }
+      if (!isForward && foldXHere < 0) return { style: { top: `${baseTop}px`, left: '-44px', right: 'auto', borderRadius: '6px 0 0 6px', transition: 'none' }, textRotate: 0 }
     }
 
-    // Fold line angle
-    const foldAngleRad = Math.atan2(foldDirY, foldDirX)
-    const tiltDeg = (foldAngleRad * 180 / Math.PI) - 90
+    // Mirror both endpoints through fold line
+    const mirror = (p: { x: number; y: number }) => {
+      const dx = p.x - mid.x, dy = p.y - mid.y
+      const dot = dx * ux + dy * uy
+      return { x: p.x - 2 * dot * ux, y: p.y - 2 * dot * uy }
+    }
+    const mTop = mirror(topPt)
+    const mBot = mirror(botPt)
 
-    // Clamp mirrorEdgeX to book bounds
-    const clampedX = Math.max(-40, Math.min(w, mirrorEdgeX))
+    // Bookmark center and angle from the two mirrored points
+    const cx = (mTop.x + mBot.x) / 2
+    const cy = (mTop.y + mBot.y) / 2
+    const angleDeg = Math.atan2(mBot.y - mTop.y, mBot.x - mTop.x) * 180 / Math.PI
+
+    // Out of bounds → clamp
+    if (cx < -60 || cx > w + 60 || cy < -60 || cy > h + 60) {
+      if (isForward) return { style: { top: `${baseTop}px`, left: '-44px', right: 'auto', borderRadius: '6px 0 0 6px', transition: 'none' }, textRotate: 0 }
+      else return { style: { top: `${baseTop}px`, right: '-44px', left: 'auto', borderRadius: '0 6px 6px 0', transition: 'none' }, textRotate: 0 }
+    }
+
+    // The bookmark rectangle: 40px wide, bmH tall
+    // It should extend OUTWARD from the mirrored page edge (away from page center)
+    const bmW = 40
+    // angleDeg is the direction from mTop to mBot (along the mirrored edge)
+    // Perpendicular pointing outward: for forward flip, the page flips left,
+    // so the mirrored edge's outward direction is to the LEFT (away from page)
+    // For backward flip, outward is to the RIGHT
+    const perpRad = (angleDeg + 90) * Math.PI / 180
+    const offsetX = isForward ? Math.cos(perpRad) * bmW : -Math.cos(perpRad) * bmW
+    const offsetY = isForward ? Math.sin(perpRad) * bmW : -Math.sin(perpRad) * bmW
+
+    const bmCx = cx + offsetX / 2
+    const bmCy = cy + offsetY / 2
+
+    // CSS: position the bookmark center, rotate to match the edge angle
+    // angleDeg is from horizontal; bookmark's natural orientation is vertical (top-to-bottom)
+    // So we need to rotate by (angleDeg - 90) to align with the edge
+    const rotateDeg = angleDeg - 90
 
     return {
-      position: 'absolute' as const,
-      top: `${baseTop}px`,
-      left: `${clampedX}px`,
-      right: 'auto',
-      width: '40px',
-      transform: `rotate(${-tiltDeg}deg)`,
-      transformOrigin: 'left center',
-      borderRadius: '0 6px 6px 0',
-      transition: 'none',
+      style: {
+        position: 'absolute' as const,
+        top: `${bmCy - bmH / 2}px`,
+        left: `${bmCx - bmW / 2}px`,
+        right: 'auto',
+        transform: `rotate(${rotateDeg}deg)`,
+        transformOrigin: 'center center',
+        borderRadius: isForward ? '6px 0 0 6px' : '0 6px 6px 0',
+        transition: 'none',
+      },
+      textRotate: 0,
     }
   }
 
@@ -244,13 +279,14 @@ export default function App() {
           const side = getBookmarkSide(i)
 
           if (side === 'moving') {
+            const { style: movStyle, textRotate } = getMovingStyle(i)
             return (
               <button
                 key={s}
                 className="bookmark bookmark-moving"
-                style={getMovingStyle(i)}
+                style={movStyle}
               >
-                {s}
+                <span style={textRotate ? { display: 'inline-block', transform: `rotate(${textRotate}deg)` } : undefined}>{s}</span>
               </button>
             )
           }
@@ -261,7 +297,7 @@ export default function App() {
                 key={s}
                 className="bookmark bookmark-left"
                 onClick={() => flipToPage(i)}
-                style={{ top: `${80 + i * 52}px` }}
+                style={{ top: `${40 + i * 58}px` }}
               >
                 {s}
               </button>
@@ -273,7 +309,7 @@ export default function App() {
               key={s}
               className={`bookmark bookmark-right ${i === currentPage ? 'bookmark-active' : ''}`}
               onClick={() => flipToPage(i)}
-              style={{ top: `${80 + i * 52}px` }}
+              style={{ top: `${40 + i * 58}px` }}
             >
               {s}
             </button>

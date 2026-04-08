@@ -112,6 +112,16 @@ export function usePageFlip(totalPages: number) {
   const dragCorner = useRef<FlipState['corner']>('bottom-right')
   const dragTarget = useRef(0)
   const dragDir = useRef<'forward' | 'backward'>('forward')
+  const sizeRef = useRef({ w: 600, h: 800 })
+
+  // Cache container size
+  const updateSize = useCallback(() => {
+    const el = containerRef.current
+    if (el) {
+      const r = el.getBoundingClientRect()
+      sizeRef.current = { w: r.width, h: r.height }
+    }
+  }, [])
 
   const getCornerOrigin = useCallback((corner: FlipState['corner'], w: number, h: number): Point => {
     switch (corner) {
@@ -127,9 +137,8 @@ export function usePageFlip(totalPages: number) {
     const canvas = canvasRef.current
     const container = containerRef.current
     if (!canvas || !container) return
-    const rect = container.getBoundingClientRect()
     const dpr = window.devicePixelRatio || 1
-    const w = rect.width, h = rect.height
+    const { w, h } = sizeRef.current
     canvas.width = w * dpr; canvas.height = h * dpr
     canvas.style.width = `${w}px`; canvas.style.height = `${h}px`
     const ctx = canvas.getContext('2d')
@@ -218,8 +227,7 @@ export function usePageFlip(totalPages: number) {
 
     const container = containerRef.current
     if (!container) return { currentClip: 'none', backClip: 'none', backTransform: '', showNext: false }
-    const rect = container.getBoundingClientRect()
-    const w = rect.width, h = rect.height
+    const { w, h } = sizeRef.current
 
     const origin = getCornerOrigin(corner, w, h)
     const nx = origin.x - finger.x, ny = origin.y - finger.y
@@ -294,14 +302,14 @@ export function usePageFlip(totalPages: number) {
   const animateTo = useCallback((targetFinger: Point, duration: number, onDone?: () => void) => {
     const sf = { ...stateRef.current.finger }
     const t0 = performance.now()
+    const container = containerRef.current
+    const w = container ? container.getBoundingClientRect().width : 600
+    const isR = stateRef.current.corner.includes('right')
     const tick = (now: number) => {
       const t = Math.min(1, (now - t0) / duration)
-      const e = 1 - Math.pow(1 - t, 3)
+      const e = t // linear
       const x = sf.x + (targetFinger.x - sf.x) * e
       const y = sf.y + (targetFinger.y - sf.y) * e
-      const container = containerRef.current
-      const w = container ? container.getBoundingClientRect().width : 600
-      const isR = stateRef.current.corner.includes('right')
       const progress = isR ? clamp((w - x) / w, 0, 1) : clamp(x / w, 0, 1)
       setState(prev => ({ ...prev, finger: { x, y }, progress }))
       if (t < 1) animRef.current = requestAnimationFrame(tick)
@@ -311,24 +319,60 @@ export function usePageFlip(totalPages: number) {
     animRef.current = requestAnimationFrame(tick)
   }, [])
 
-  const flipToPage = useCallback((idx: number) => {
+  const flipToPage = useCallback((idx: number, zone: 'top' | 'middle' | 'bottom' = 'bottom') => {
     const cur = stateRef.current.currentPage
     if (idx === cur || stateRef.current.flipping || idx < 0 || idx >= totalPages) return
     const container = containerRef.current
     if (!container) return
-    const { width: w, height: h } = container.getBoundingClientRect()
+    updateSize()
+    const { w, h } = sizeRef.current
     const dir = idx > cur ? 'forward' : 'backward'
-    const corner: FlipState['corner'] = dir === 'forward' ? 'bottom-right' : 'bottom-left'
-    const origin = dir === 'forward' ? { x: w, y: h } : { x: 0, y: h }
-    const target = dir === 'forward' ? { x: -w * 0.15, y: h * 0.4 } : { x: w * 1.15, y: h * 0.4 }
-    setState(prev => ({ ...prev, flipping: true, direction: dir, targetPage: idx, corner, finger: origin, progress: 0 }))
+
+    // Origin and target depend on zone
+    let corner: FlipState['corner']
+    let origin: Point
+    let target: Point
+
+    if (dir === 'forward') {
+      if (zone === 'top') {
+        corner = 'top-right'
+        origin = { x: w, y: 0 }
+        target = { x: -w * 0.5, y: h * 0.15 }
+      } else if (zone === 'middle') {
+        // Scroll-like: start from right-middle, sweep straight left
+        corner = 'bottom-right'
+        origin = { x: w, y: h }
+        target = { x: -w * 0.5, y: h }
+      } else {
+        corner = 'bottom-right'
+        origin = { x: w, y: h }
+        target = { x: -w * 0.5, y: h * 0.85 }
+      }
+    } else {
+      if (zone === 'top') {
+        corner = 'top-left'
+        origin = { x: 0, y: 0 }
+        target = { x: w * 1.5, y: h * 0.15 }
+      } else if (zone === 'middle') {
+        corner = 'bottom-left'
+        origin = { x: 0, y: h }
+        target = { x: w * 1.5, y: h }
+      } else {
+        corner = 'bottom-left'
+        origin = { x: 0, y: h }
+        target = { x: w * 1.5, y: h * 0.85 }
+      }
+    }
+
+    setState(prev => ({ ...prev, direction: dir, targetPage: idx, corner, finger: origin, progress: 0 }))
     requestAnimationFrame(() => {
-      animateTo(target, 650, () => {
+      setState(prev => ({ ...prev, flipping: true }))
+      animateTo(target, 1000, () => {
         setState(prev => ({ ...prev, currentPage: idx, progress: 1 }))
         requestAnimationFrame(() => { setState({ ...INITIAL, currentPage: idx }) })
       })
     })
-  }, [totalPages, animateTo])
+  }, [totalPages, animateTo, updateSize])
 
   // ── Mouse / touch ──
   useEffect(() => {
@@ -374,9 +418,12 @@ export function usePageFlip(totalPages: number) {
       dragActive.current = false
       if (!hasMoved.current) {
         const rect = container.getBoundingClientRect()
-        const rx = cx - rect.left
-        if (rx > rect.width * 0.6 && stateRef.current.currentPage < totalPages - 1) flipToPage(stateRef.current.currentPage + 1)
-        else if (rx < rect.width * 0.4 && stateRef.current.currentPage > 0) flipToPage(stateRef.current.currentPage - 1)
+        const rx = cx - rect.left, ry = cy - rect.top
+        const h = rect.height
+        // Detect zone: top third, middle third, bottom third
+        const zone: 'top' | 'middle' | 'bottom' = ry < h * 0.33 ? 'top' : ry > h * 0.67 ? 'bottom' : 'middle'
+        if (rx > rect.width * 0.6 && stateRef.current.currentPage < totalPages - 1) flipToPage(stateRef.current.currentPage + 1, zone)
+        else if (rx < rect.width * 0.4 && stateRef.current.currentPage > 0) flipToPage(stateRef.current.currentPage - 1, zone)
         return
       }
       const p = stateRef.current.progress, rect = container.getBoundingClientRect()
@@ -384,7 +431,7 @@ export function usePageFlip(totalPages: number) {
       if (p > 0.2) {
         // Continue from current finger position to fully flipped — duration proportional to remaining distance
         const currentFinger = stateRef.current.finger
-        const tgt = isR ? { x: -w * 0.1, y: currentFinger.y } : { x: w * 1.1, y: currentFinger.y }
+        const tgt = isR ? { x: -w * 0.5, y: currentFinger.y } : { x: w * 1.5, y: currentFinger.y }
         const remaining = 1 - p
         const duration = Math.max(150, remaining * 400)
         animateTo(tgt, duration, () => {
@@ -416,6 +463,13 @@ export function usePageFlip(totalPages: number) {
   }, [totalPages, flipToPage, animateTo, getCornerOrigin])
 
   useEffect(() => { draw() }, [state, draw])
+
+  // Keep size cached
+  useEffect(() => {
+    updateSize()
+    window.addEventListener('resize', updateSize)
+    return () => window.removeEventListener('resize', updateSize)
+  }, [updateSize])
 
   return { state, canvasRef, containerRef, flipToPage, getClipPaths, getFoldRightEdgeY, getFoldLeftEdgeY }
 }
