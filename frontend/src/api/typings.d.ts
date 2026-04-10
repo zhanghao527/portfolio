@@ -77,3 +77,110 @@ declare namespace API {
     pages?: number;
   };
 }
+
+declare namespace API {
+  // ── Content types ──
+
+  type ProfileVO = {
+    id?: number;
+    name?: string;
+    roleTitle?: string;
+    bio?: string;
+    avatar?: string;
+    githubUrl?: string;
+    email?: string;
+  };
+
+  type ProfileUpdateRequest = {
+    name?: string;
+    roleTitle?: string;
+    bio?: string;
+    avatar?: string;
+    githubUrl?: string;
+    email?: string;
+  };
+
+  type ProjectVO = {
+    id?: number;
+    name?: string;
+    description?: string;
+    icon?: string;
+    category?: string;
+    screenshot?: string;
+    link?: string;
+    github?: string;
+    sortOrder?: number;
+  };
+
+  type ProjectAddRequest = {
+    name: string;
+    description?: string;
+    icon?: string;
+    category: string;
+    screenshot?: string;
+    link?: string;
+    github?: string;
+    sortOrder?: number;
+  };
+
+  type ProjectUpdateRequest = {
+    id: number;
+    name?: string;
+    description?: string;
+    icon?: string;
+    category?: string;
+    screenshot?: string;
+    link?: string;
+    github?: string;
+    sortOrder?: number;
+  };
+
+  type TechVO = {
+    id?: number;
+    name?: string;
+    icon?: string;
+    category?: string;
+    sortOrder?: number;
+  };
+
+  type TechAddRequest = {
+    name: string;
+    icon?: string;
+    category: string;
+    sortOrder?: number;
+  };
+
+  type TechUpdateRequest = {
+    id: number;
+    name?: string;
+    icon?: string;
+    category?: string;
+    sortOrder?: number;
+  };
+
+  type BlogChapterVO = {
+    id?: number;
+    name?: string;
+    icon?: string;
+    description?: string;
+    link?: string;
+    sortOrder?: number;
+  };
+
+  type BlogChapterAddRequest = {
+    name: string;
+    icon?: string;
+    description?: string;
+    link: string;
+    sortOrder?: number;
+  };
+
+  type BlogChapterUpdateRequest = {
+    id: number;
+    name?: string;
+    icon?: string;
+    description?: string;
+    link?: string;
+    sortOrder?: number;
+  };
+}

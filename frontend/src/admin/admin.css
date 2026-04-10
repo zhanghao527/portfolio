@@ -1,0 +1,321 @@
+/* ── Admin Login ── */
+.admin-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f6f5f4;
+  font-family: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+.admin-login-card {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: 40px;
+  width: 360px;
+  box-shadow: rgba(0,0,0,0.04) 0px 4px 18px;
+}
+
+.admin-login-card h1 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: rgba(0,0,0,0.9);
+}
+
+.admin-login-card p {
+  font-size: 0.85rem;
+  color: #615d59;
+  margin: 0 0 24px;
+}
+
+.admin-login-card input {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.admin-login-card input:focus {
+  outline: none;
+  border-color: #0075de;
+}
+
+.admin-login-card button {
+  width: 100%;
+  padding: 10px;
+  background: #0075de;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-login-card button:hover { background: #005bab; }
+.admin-login-card button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.admin-login-error {
+  color: #e53e3e;
+  font-size: 0.82rem;
+  margin: 0 0 12px;
+}
+
+/* ── Admin Dashboard ── */
+.admin-dashboard {
+  min-height: 100vh;
+  background: #f6f5f4;
+  font-family: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: #fff;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.admin-header h1 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  color: rgba(0,0,0,0.9);
+}
+
+.admin-logout {
+  padding: 6px 16px;
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  color: #615d59;
+}
+.admin-logout:hover { background: #f6f5f4; }
+
+.admin-body {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  gap: 24px;
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+}
+
+.admin-nav-item {
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #615d59;
+  cursor: pointer;
+  text-align: left;
+}
+.admin-nav-item:hover { background: rgba(0,0,0,0.04); }
+.admin-nav-item.active {
+  background: #fff;
+  color: rgba(0,0,0,0.9);
+  font-weight: 600;
+  box-shadow: rgba(0,0,0,0.04) 0px 2px 8px;
+}
+
+.admin-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Manager common ── */
+.admin-manager {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.admin-manager h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  color: rgba(0,0,0,0.9);
+}
+
+.admin-manager-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.admin-btn-add {
+  padding: 6px 16px;
+  background: #0075de;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.admin-btn-add:hover { background: #005bab; }
+
+.admin-msg {
+  font-size: 0.82rem;
+  color: #0075de;
+  margin: 8px 0;
+}
+
+/* ── Edit panel ── */
+.admin-edit-panel {
+  background: #f6f5f4;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.admin-edit-panel h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 16px;
+  color: rgba(0,0,0,0.85);
+}
+
+/* ── Form ── */
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #615d59;
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-family: inherit;
+}
+
+.admin-form input:focus,
+.admin-form textarea:focus,
+.admin-form select:focus {
+  outline: none;
+  border-color: #0075de;
+}
+
+.admin-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.admin-form-actions button {
+  padding: 8px 20px;
+  background: #0075de;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.admin-form-actions button:hover { background: #005bab; }
+
+.admin-btn-cancel {
+  background: transparent !important;
+  color: #615d59 !important;
+  border: 1px solid rgba(0,0,0,0.15) !important;
+}
+.admin-btn-cancel:hover { background: #f6f5f4 !important; }
+
+/* ── Table ── */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 600;
+  color: #615d59;
+  border-bottom: 2px solid rgba(0,0,0,0.08);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  color: rgba(0,0,0,0.8);
+}
+
+.admin-td-desc {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-td-actions {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.admin-td-actions button {
+  padding: 4px 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 4px;
+  background: #fff;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: rgba(0,0,0,0.7);
+}
+.admin-td-actions button:hover { background: #f6f5f4; }
+
+.admin-btn-danger {
+  color: #e53e3e !important;
+  border-color: rgba(229,62,62,0.2) !important;
+}
+.admin-btn-danger:hover { background: #fff5f5 !important; }
+
+.admin-td-empty {
+  text-align: center;
+  color: #a39e98;
+  padding: 32px 12px !important;
+}
+
+.admin-table a {
+  color: #0075de;
+  text-decoration: none;
+}
+.admin-table a:hover { text-decoration: underline; }
