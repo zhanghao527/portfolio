@@ -76,6 +76,7 @@ export default function ProjectManager() {
             <label>截图 URL<input value={editing.screenshot || ''} onChange={e => set('screenshot', e.target.value)} /></label>
             <label>项目链接<input value={editing.link || ''} onChange={e => set('link', e.target.value)} /></label>
             <label>GitHub<input value={editing.github || ''} onChange={e => set('github', e.target.value)} /></label>
+            <label>文档链接<input value={editing.doc || ''} onChange={e => set('doc', e.target.value)} placeholder="语雀等文档地址" /></label>
             <label>排序<input type="number" value={editing.sortOrder ?? 0} onChange={e => set('sortOrder', Number(e.target.value))} /></label>
             <div className="admin-form-actions">
               <button onClick={handleSave}>保存</button>

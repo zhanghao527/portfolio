@@ -109,6 +109,7 @@ declare namespace API {
     screenshot?: string;
     link?: string;
     github?: string;
+    doc?: string;
     sortOrder?: number;
   };
 
@@ -120,6 +121,7 @@ declare namespace API {
     screenshot?: string;
     link?: string;
     github?: string;
+    doc?: string;
     sortOrder?: number;
   };
 
@@ -132,6 +134,7 @@ declare namespace API {
     screenshot?: string;
     link?: string;
     github?: string;
+    doc?: string;
     sortOrder?: number;
   };
 

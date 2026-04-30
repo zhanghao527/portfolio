@@ -13,5 +13,6 @@ public class ProjectVO implements Serializable {
     private String screenshot;
     private String link;
     private String github;
+    private String doc;
     private Integer sortOrder;
 }

@@ -26,6 +26,7 @@ export interface ProjectItem {
   screenshot?: string
   link?: string
   github?: string
+  doc?: string
 }
 
 export interface TechItem {
@@ -146,6 +147,7 @@ export async function loadContentData(): Promise<void> {
         screenshot: p.screenshot,
         link: p.link,
         github: p.github,
+        doc: p.doc,
       }))
     }
   }

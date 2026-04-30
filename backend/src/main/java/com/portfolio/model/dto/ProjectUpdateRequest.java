@@ -15,5 +15,6 @@ public class ProjectUpdateRequest implements Serializable {
     private String screenshot;
     private String link;
     private String github;
+    private String doc;
     private Integer sortOrder;
 }

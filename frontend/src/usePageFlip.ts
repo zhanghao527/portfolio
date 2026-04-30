@@ -407,7 +407,7 @@ export function usePageFlip(totalPages: number) {
 
         // If the click target is an interactive element, don't trigger flip
         const elUnder = document.elementFromPoint(cx, cy)
-        if (elUnder && elUnder.closest('a, button, input, textarea, select, [role="button"], [onclick], .project-card-link, .cover-pill, .stat-item-hover, .page-num-item, .tech-tag, .blog-toc-entry')) return
+        if (elUnder && elUnder.closest('a, button, input, textarea, select, [role="button"], [onclick], .project-card-link, .cover-pill, .stat-item-hover, .page-num-item, .tech-tag, .blog-toc-entry, .project-doc, .project-github')) return
 
         const h = rect.height
         const zone: 'top' | 'middle' | 'bottom' = ry < h * 0.33 ? 'top' : ry > h * 0.67 ? 'bottom' : 'middle'
