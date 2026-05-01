@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS `user` (
 
 -- 种子数据：默认管理员（密码: 12345678，BCrypt 加密）
 INSERT INTO `user` (`id`, `user_account`, `user_password`, `user_name`, `user_role`)
-VALUES (1, 'admin', '$2a$10$YVS4FzXRRGbsaU6WHj/jkesZBRvJcMN3P/gKCmSMzf/6pByBmwDCy', '管理员', 'admin');
+VALUES (1, 'admin', '$2a$10$gqlBp8X9BU6m9cZxnhhbL.UCACBgbCqH3zeiqBZyDtF66UOZnn7DG', '管理员', 'admin');
 
 -- 种子数据：普通测试用户（密码: 12345678）
 INSERT INTO `user` (`id`, `user_account`, `user_password`, `user_name`, `user_role`)
-VALUES (2, 'testuser', '$2a$10$YVS4FzXRRGbsaU6WHj/jkesZBRvJcMN3P/gKCmSMzf/6pByBmwDCy', '测试用户', 'user');
+VALUES (2, 'testuser', '$2a$10$gqlBp8X9BU6m9cZxnhhbL.UCACBgbCqH3zeiqBZyDtF66UOZnn7DG', '测试用户', 'user');
