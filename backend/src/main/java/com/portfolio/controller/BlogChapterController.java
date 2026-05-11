@@ -7,6 +7,7 @@ import com.portfolio.common.api.Result;
 import com.portfolio.common.constant.UserConstant;
 import com.portfolio.common.exception.ThrowUtils;
 import com.portfolio.common.utils.BeanCopyUtils;
+import com.portfolio.common.utils.ContentCacheUtils;
 import com.portfolio.model.dto.BlogChapterAddRequest;
 import com.portfolio.model.dto.BlogChapterUpdateRequest;
 import com.portfolio.model.entity.BlogChapter;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class BlogChapterController {
 
     private final BlogChapterService blogChapterService;
+    private final ContentCacheUtils contentCacheUtils;
 
     @GetMapping("/list")
     public Result<List<BlogChapterVO>> listBlogChapters() {
@@ -44,6 +46,7 @@ public class BlogChapterController {
         if (chapter.getSortOrder() == null) chapter.setSortOrder(0);
         boolean saved = blogChapterService.save(chapter);
         ThrowUtils.throwIf(!saved, ErrorCode.OPERATION_ERROR);
+        contentCacheUtils.evict();
         return Result.success(chapter.getId());
     }
 
@@ -54,6 +57,7 @@ public class BlogChapterController {
         BlogChapter chapter = BeanCopyUtils.copyBean(request, BlogChapter.class);
         boolean updated = blogChapterService.updateById(chapter);
         ThrowUtils.throwIf(!updated, ErrorCode.OPERATION_ERROR);
+        contentCacheUtils.evict();
         return Result.success(true);
     }
 
@@ -62,6 +66,7 @@ public class BlogChapterController {
     public Result<Boolean> deleteBlogChapter(@RequestBody long id) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         boolean removed = blogChapterService.removeById(id);
+        contentCacheUtils.evict();
         return Result.success(removed);
     }
 }

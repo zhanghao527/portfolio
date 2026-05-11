@@ -67,13 +67,11 @@ export default function ProjectManager() {
           <div className="admin-form">
             <label>名称<input value={editing.name || ''} onChange={e => set('name', e.target.value)} /></label>
             <label>描述<input value={editing.description || ''} onChange={e => set('description', e.target.value)} /></label>
-            <label>图标<input value={editing.icon || ''} onChange={e => set('icon', e.target.value)} /></label>
             <label>分类
               <select value={editing.category || 'Web'} onChange={e => set('category', e.target.value)}>
                 {['Web', '小程序', 'App', '硬件', '嵌入式', '工具'].map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </label>
-            <label>截图 URL<input value={editing.screenshot || ''} onChange={e => set('screenshot', e.target.value)} /></label>
             <label>项目链接<input value={editing.link || ''} onChange={e => set('link', e.target.value)} /></label>
             <label>GitHub<input value={editing.github || ''} onChange={e => set('github', e.target.value)} /></label>
             <label>文档链接<input value={editing.doc || ''} onChange={e => set('doc', e.target.value)} placeholder="语雀等文档地址" /></label>
@@ -88,13 +86,12 @@ export default function ProjectManager() {
 
       <table className="admin-table">
         <thead>
-          <tr><th>排序</th><th>图标</th><th>名称</th><th>分类</th><th>描述</th><th>操作</th></tr>
+          <tr><th>排序</th><th>名称</th><th>分类</th><th>描述</th><th>操作</th></tr>
         </thead>
         <tbody>
           {items.map(item => (
             <tr key={item.id}>
               <td>{item.sortOrder}</td>
-              <td>{item.icon}</td>
               <td>{item.name}</td>
               <td>{item.category}</td>
               <td className="admin-td-desc">{item.description}</td>
@@ -104,7 +101,7 @@ export default function ProjectManager() {
               </td>
             </tr>
           ))}
-          {items.length === 0 && <tr><td colSpan={6} className="admin-td-empty">暂无数据</td></tr>}
+          {items.length === 0 && <tr><td colSpan={5} className="admin-td-empty">暂无数据</td></tr>}
         </tbody>
       </table>
     </div>

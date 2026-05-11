@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { usePageFlip } from './usePageFlip'
 import { useAutoPaginate } from './useAutoPaginate'
-import { SECTIONS, PROFILE, loadContentData } from './pageData'
+import { SECTIONS, PROFILE, loadContentData, hydrateFromCache } from './pageData'
 
 /* ─── Page number bar with hover-to-input jump ─── */
 function PageNumBar({ pageIdx, getPageInfo, onGlobalJump, onSectionJump }: {
@@ -101,11 +101,11 @@ function CoverContent() {
         {/* Social pills */}
         <div className="cover-links">
           {PROFILE.githubUrl && (
-            <span className="cover-pill cover-pill-github">
+            <a className="cover-pill cover-pill-github" href={PROFILE.githubUrl} target="_blank" rel="noreferrer">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
               GitHub
               <span className="cover-github-tooltip">{PROFILE.githubUrl}</span>
-            </span>
+            </a>
           )}
           {PROFILE.email && (
             <span className="cover-pill cover-pill-email">
@@ -124,10 +124,13 @@ function CoverContent() {
 }
 
 export default function App() {
-  // Load content data from backend on mount
-  const [dataLoaded, setDataLoaded] = useState(false)
+  // Hydrate from localStorage cache synchronously before render — no network wait
+  const [dataVersion, setDataVersion] = useState(() => (hydrateFromCache() ? 1 : 0))
   useEffect(() => {
-    loadContentData().finally(() => setDataLoaded(true))
+    // Fetch fresh data in background; bump version only if changed
+    loadContentData().then(changed => {
+      if (changed) setDataVersion(v => v + 1)
+    })
   }, [])
 
   // We need book dimensions for pagination measurement.
@@ -135,8 +138,9 @@ export default function App() {
   const [bookSize, setBookSize] = useState({ w: 0, h: 0 })
 
   const { pages, sectionToPages, pageToSection, categoryPageMap, ready } = useAutoPaginate(
-    dataLoaded ? bookSize.w : 0,
-    dataLoaded ? bookSize.h : 0,
+    bookSize.w,
+    bookSize.h,
+    dataVersion,
   )
   const totalPages = ready ? pages.length : 1
 

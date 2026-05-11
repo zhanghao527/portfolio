@@ -66,7 +66,6 @@ export default function TechManager() {
           <h3>{isNew ? '新增技术' : '编辑技术'}</h3>
           <div className="admin-form">
             <label>名称<input value={editing.name || ''} onChange={e => set('name', e.target.value)} /></label>
-            <label>图标<input value={editing.icon || ''} onChange={e => set('icon', e.target.value)} /></label>
             <label>分类
               <select value={editing.category || '前端'} onChange={e => set('category', e.target.value)}>
                 {['前端', '后端', '数据库 & 存储', 'DevOps & 工具'].map(c => <option key={c} value={c}>{c}</option>)}
@@ -83,13 +82,12 @@ export default function TechManager() {
 
       <table className="admin-table">
         <thead>
-          <tr><th>排序</th><th>图标</th><th>名称</th><th>分类</th><th>操作</th></tr>
+          <tr><th>排序</th><th>名称</th><th>分类</th><th>操作</th></tr>
         </thead>
         <tbody>
           {items.map(item => (
             <tr key={item.id}>
               <td>{item.sortOrder}</td>
-              <td>{item.icon}</td>
               <td>{item.name}</td>
               <td>{item.category}</td>
               <td className="admin-td-actions">
@@ -98,7 +96,7 @@ export default function TechManager() {
               </td>
             </tr>
           ))}
-          {items.length === 0 && <tr><td colSpan={5} className="admin-td-empty">暂无数据</td></tr>}
+          {items.length === 0 && <tr><td colSpan={4} className="admin-td-empty">暂无数据</td></tr>}
         </tbody>
       </table>
     </div>

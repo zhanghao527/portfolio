@@ -5,7 +5,7 @@
  * Call `loadContentData()` on app startup to fetch from backend.
  */
 
-import { getProfile, listProjects, listTechs, listBlogChapters } from './api/contentController'
+import { getAllContent } from './api/contentController'
 
 // ── Types ──
 
@@ -110,73 +110,96 @@ export const PROJECT_CATEGORIES = ['Web', '小程序', 'App', '硬件', '嵌入�
 
 /**
  * Load all content data from backend API.
- * Falls back to defaults on failure.
+ * Strategy:
+ * 1. Hydrate from localStorage cache immediately (if present) — no network wait
+ * 2. Then fetch fresh data from backend in background (stale-while-revalidate)
+ * Returns true if the data differs from the current state (needs repagination).
  */
-export async function loadContentData(): Promise<void> {
-  const results = await Promise.allSettled([
-    getProfile(),
-    listProjects(),
-    listTechs(),
-    listBlogChapters(),
-  ])
+const CACHE_KEY = 'portfolio_content_cache_v1'
 
-  // Profile
-  if (results[0].status === 'fulfilled') {
-    const p = results[0].value?.data
-    if (p) {
-      PROFILE = {
-        name: p.name || DEFAULT_PROFILE.name,
-        roleTitle: p.roleTitle || DEFAULT_PROFILE.roleTitle,
-        bio: p.bio || DEFAULT_PROFILE.bio,
-        avatar: p.avatar || DEFAULT_PROFILE.avatar,
-        githubUrl: p.githubUrl || DEFAULT_PROFILE.githubUrl,
-        email: p.email || DEFAULT_PROFILE.email,
-      }
+function applyData(data: any): boolean {
+  if (!data) return false
+  let changed = false
+
+  if (data.profile) {
+    const p = data.profile
+    const next: ProfileData = {
+      name: p.name || DEFAULT_PROFILE.name,
+      roleTitle: p.roleTitle || DEFAULT_PROFILE.roleTitle,
+      bio: p.bio || DEFAULT_PROFILE.bio,
+      avatar: p.avatar || DEFAULT_PROFILE.avatar,
+      githubUrl: p.githubUrl || DEFAULT_PROFILE.githubUrl,
+      email: p.email || DEFAULT_PROFILE.email,
     }
+    if (JSON.stringify(next) !== JSON.stringify(PROFILE)) { PROFILE = next; changed = true }
   }
 
-  // Projects
-  if (results[1].status === 'fulfilled') {
-    const list = results[1].value?.data
-    if (list && list.length > 0) {
-      PROJECTS = list.map(p => ({
-        name: p.name || '',
-        desc: p.description || '',
-        icon: p.icon || '📁',
-        category: p.category || 'Web',
-        screenshot: p.screenshot,
-        link: p.link,
-        github: p.github,
-        doc: p.doc,
-      }))
-    }
+  if (Array.isArray(data.projects) && data.projects.length > 0) {
+    const next = data.projects.map((p: any) => ({
+      name: p.name || '',
+      desc: p.description || '',
+      icon: p.icon || '📁',
+      category: p.category || 'Web',
+      screenshot: p.screenshot,
+      link: p.link,
+      github: p.github,
+      doc: p.doc,
+    }))
+    if (JSON.stringify(next) !== JSON.stringify(PROJECTS)) { PROJECTS = next; changed = true }
   }
 
-  // Techs → group by category
-  if (results[2].status === 'fulfilled') {
-    const list = results[2].value?.data
-    if (list && list.length > 0) {
-      const groupMap = new Map<string, TechItem[]>()
-      for (const t of list) {
-        const cat = t.category || '其他'
-        if (!groupMap.has(cat)) groupMap.set(cat, [])
-        groupMap.get(cat)!.push({ name: t.name || '', icon: t.icon || '🔧' })
-      }
-      TECH_GROUPS = Array.from(groupMap.entries()).map(([category, items]) => ({ category, items }))
+  if (Array.isArray(data.techs) && data.techs.length > 0) {
+    const groupMap = new Map<string, TechItem[]>()
+    for (const t of data.techs) {
+      const cat = t.category || '其他'
+      if (!groupMap.has(cat)) groupMap.set(cat, [])
+      groupMap.get(cat)!.push({ name: t.name || '', icon: t.icon || '🔧' })
+    }
+    const nextGroups = Array.from(groupMap.entries()).map(([category, items]) => ({ category, items }))
+    if (JSON.stringify(nextGroups) !== JSON.stringify(TECH_GROUPS)) {
+      TECH_GROUPS = nextGroups
       TECHS = TECH_GROUPS.flatMap(g => g.items.map(i => i.name))
+      changed = true
     }
   }
 
-  // Blog chapters
-  if (results[3].status === 'fulfilled') {
-    const list = results[3].value?.data
-    if (list && list.length > 0) {
-      BLOG_CHAPTERS = list.map(b => ({
-        name: b.name || '',
-        icon: b.icon || '📄',
-        desc: b.description || '',
-        link: b.link || '#',
-      }))
-    }
+  if (Array.isArray(data.blogChapters) && data.blogChapters.length > 0) {
+    const next = data.blogChapters.map((b: any) => ({
+      name: b.name || '',
+      icon: b.icon || '📄',
+      desc: b.description || '',
+      link: b.link || '#',
+    }))
+    if (JSON.stringify(next) !== JSON.stringify(BLOG_CHAPTERS)) { BLOG_CHAPTERS = next; changed = true }
+  }
+
+  return changed
+}
+
+/**
+ * Synchronously hydrate from localStorage (call before render).
+ * Returns true if cached data was applied.
+ */
+export function hydrateFromCache(): boolean {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) return false
+    const cached = JSON.parse(raw)
+    return applyData(cached)
+  } catch { return false }
+}
+
+/**
+ * Fetch fresh data from backend. Returns true if content changed vs current state.
+ */
+export async function loadContentData(): Promise<boolean> {
+  try {
+    const res = await getAllContent()
+    if (!res.data) return false
+    const changed = applyData(res.data)
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(res.data)) } catch {}
+    return changed
+  } catch {
+    return false
   }
 }

@@ -7,6 +7,7 @@ import com.portfolio.common.api.Result;
 import com.portfolio.common.constant.UserConstant;
 import com.portfolio.common.exception.ThrowUtils;
 import com.portfolio.common.utils.BeanCopyUtils;
+import com.portfolio.common.utils.ContentCacheUtils;
 import com.portfolio.model.dto.TechAddRequest;
 import com.portfolio.model.dto.TechUpdateRequest;
 import com.portfolio.model.entity.Tech;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class TechController {
 
     private final TechService techService;
+    private final ContentCacheUtils contentCacheUtils;
 
     @GetMapping("/list")
     public Result<List<TechVO>> listTechs() {
@@ -44,6 +46,7 @@ public class TechController {
         if (tech.getSortOrder() == null) tech.setSortOrder(0);
         boolean saved = techService.save(tech);
         ThrowUtils.throwIf(!saved, ErrorCode.OPERATION_ERROR);
+        contentCacheUtils.evict();
         return Result.success(tech.getId());
     }
 
@@ -54,6 +57,7 @@ public class TechController {
         Tech tech = BeanCopyUtils.copyBean(request, Tech.class);
         boolean updated = techService.updateById(tech);
         ThrowUtils.throwIf(!updated, ErrorCode.OPERATION_ERROR);
+        contentCacheUtils.evict();
         return Result.success(true);
     }
 
@@ -62,6 +66,7 @@ public class TechController {
     public Result<Boolean> deleteTech(@RequestBody long id) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         boolean removed = techService.removeById(id);
+        contentCacheUtils.evict();
         return Result.success(removed);
     }
 }

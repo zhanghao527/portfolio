@@ -138,11 +138,16 @@ export function usePageFlip(totalPages: number) {
     if (!canvas || !container) return
     const dpr = window.devicePixelRatio || 1
     const { w, h } = sizeRef.current
-    canvas.width = w * dpr; canvas.height = h * dpr
-    canvas.style.width = `${w}px`; canvas.style.height = `${h}px`
+    const targetW = Math.round(w * dpr)
+    const targetH = Math.round(h * dpr)
+    // Only reallocate canvas buffer when size actually changes
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+      canvas.width = targetW; canvas.height = targetH
+      canvas.style.width = `${w}px`; canvas.style.height = `${h}px`
+    }
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    ctx.scale(dpr, dpr)
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     ctx.clearRect(0, 0, w, h)
 
     const { flipping, finger, corner } = stateRef.current

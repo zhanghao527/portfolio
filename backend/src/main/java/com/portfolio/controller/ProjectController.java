@@ -7,6 +7,7 @@ import com.portfolio.common.api.Result;
 import com.portfolio.common.constant.UserConstant;
 import com.portfolio.common.exception.ThrowUtils;
 import com.portfolio.common.utils.BeanCopyUtils;
+import com.portfolio.common.utils.ContentCacheUtils;
 import com.portfolio.model.dto.ProjectAddRequest;
 import com.portfolio.model.dto.ProjectUpdateRequest;
 import com.portfolio.model.entity.Project;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final ContentCacheUtils contentCacheUtils;
 
     @GetMapping("/list")
     public Result<List<ProjectVO>> listProjects() {
@@ -44,6 +46,7 @@ public class ProjectController {
         if (project.getSortOrder() == null) project.setSortOrder(0);
         boolean saved = projectService.save(project);
         ThrowUtils.throwIf(!saved, ErrorCode.OPERATION_ERROR);
+        contentCacheUtils.evict();
         return Result.success(project.getId());
     }
 
@@ -54,6 +57,7 @@ public class ProjectController {
         Project project = BeanCopyUtils.copyBean(request, Project.class);
         boolean updated = projectService.updateById(project);
         ThrowUtils.throwIf(!updated, ErrorCode.OPERATION_ERROR);
+        contentCacheUtils.evict();
         return Result.success(true);
     }
 
@@ -62,6 +66,7 @@ public class ProjectController {
     public Result<Boolean> deleteProject(@RequestBody long id) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         boolean removed = projectService.removeById(id);
+        contentCacheUtils.evict();
         return Result.success(removed);
     }
 }

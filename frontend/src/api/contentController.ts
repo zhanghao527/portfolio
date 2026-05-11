@@ -5,6 +5,16 @@ export async function getProfile() {
   return request<API.BaseResponse<API.ProfileVO>>("/api/profile/get", { method: "GET" });
 }
 
+// ── Aggregated content (all-in-one for cover page load) ──
+export async function getAllContent() {
+  return request<API.BaseResponse<{
+    profile?: API.ProfileVO;
+    projects?: API.ProjectVO[];
+    techs?: API.TechVO[];
+    blogChapters?: API.BlogChapterVO[];
+  }>>("/api/content/all", { method: "GET" });
+}
+
 export async function updateProfile(body: API.ProfileUpdateRequest) {
   return request<API.BaseResponse<boolean>>("/api/profile/update", {
     method: "POST",

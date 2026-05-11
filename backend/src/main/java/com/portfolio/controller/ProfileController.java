@@ -6,6 +6,7 @@ import com.portfolio.common.api.Result;
 import com.portfolio.common.constant.UserConstant;
 import com.portfolio.common.exception.ThrowUtils;
 import com.portfolio.common.utils.BeanCopyUtils;
+import com.portfolio.common.utils.ContentCacheUtils;
 import com.portfolio.model.dto.ProfileUpdateRequest;
 import com.portfolio.model.entity.Profile;
 import com.portfolio.model.vo.ProfileVO;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final ContentCacheUtils contentCacheUtils;
 
     @GetMapping("/get")
     public Result<ProfileVO> getProfile() {
@@ -38,6 +40,7 @@ public class ProfileController {
         profile.setId(1L);
         boolean updated = profileService.saveOrUpdate(profile);
         ThrowUtils.throwIf(!updated, ErrorCode.OPERATION_ERROR);
+        contentCacheUtils.evict();
         return Result.success(true);
     }
 }

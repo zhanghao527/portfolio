@@ -307,7 +307,6 @@ html, body, #root {
 
 .cover-pill-github {
   position: relative;
-  cursor: default;
 }
 
 .cover-github-tooltip {
@@ -467,119 +466,78 @@ html, body, #root {
   letter-spacing: 0.3px;
 }
 
-.project-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.project-card {
+/* ── Project list ── */
+.project-list {
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  overflow: hidden;
-  transition: box-shadow 0.2s, border-color 0.2s;
-  text-decoration: none;
-  color: inherit;
 }
 
-.project-card-link { cursor: pointer; }
-
-.project-card:hover {
-  border-color: #ddd;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+.project-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  transition: background 0.15s;
 }
 
-/* Screenshot / thumbnail */
-.project-thumb {
-  width: 100%;
-  height: 80px;
-  overflow: hidden;
-  background: #f5f5f5;
+.project-list-item:last-child { border-bottom: none; }
+
+.project-list-item:hover {
+  background: rgba(0,0,0,0.02);
 }
 
-.project-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.3s;
-}
-
-.project-card:hover .project-thumb img {
-  transform: scale(1.03);
-}
-
-.project-thumb-empty {
+.project-list-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f8f8f8, #efefef);
+  font-size: 1.1rem;
+  background: #f6f5f4;
+  border-radius: 8px;
 }
 
-.project-thumb-icon {
-  font-size: 1.4rem;
-  opacity: 0.4;
-}
-
-/* Card body */
-.project-card-body {
-  padding: 8px 10px 10px;
-  display: flex;
-  flex-direction: column;
+.project-list-body {
   flex: 1;
+  min-width: 0;
 }
 
-.project-card h3 {
-  font-size: 0.78rem;
+.project-list-name {
+  font-size: 0.85rem;
   font-weight: 600;
-  color: #1a1a1a;
-  margin-bottom: 3px;
+  color: rgba(0,0,0,0.88);
+  margin-bottom: 2px;
   line-height: 1.3;
 }
 
-.project-desc {
-  font-size: 0.68rem;
+.project-list-desc {
+  font-size: 0.72rem;
   font-weight: 400;
-  color: #999;
+  color: #8a8078;
   line-height: 1.4;
-  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.project-link-hint {
-  font-size: 0.62rem;
-  font-weight: 500;
-  color: #ccc;
+.project-list-icons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.project-github, .project-doc, .project-link {
+  display: flex;
+  align-items: center;
+  color: #bbb;
   transition: color 0.15s;
+  cursor: pointer;
 }
 
-.project-card:hover .project-link-hint {
-  color: #3b82f6;
-}
-
-.project-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 6px;
-}
-
-.project-card-icons {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.project-github, .project-doc {
-  display: flex;
-  align-items: center;
-  color: #ccc;
-  transition: color 0.15s;
-}
-
-.project-github:hover, .project-doc:hover {
+.project-github:hover, .project-doc:hover, .project-link:hover {
   color: #1a1a1a;
 }
 
@@ -608,11 +566,6 @@ html, body, #root {
   font-weight: 500;
   color: rgba(0,0,0,0.85);
   transition: all 0.2s;
-}
-
-.tech-tag-icon {
-  font-size: 0.9rem;
-  line-height: 1;
 }
 
 .tech-tag:hover {
@@ -820,8 +773,8 @@ html, body, #root {
     padding: 40px 24px 24px;
   }
 
-  .project-thumb {
-    height: 70px;
+  .project-list-item {
+    padding: 8px 4px;
   }
 }
 
@@ -862,25 +815,23 @@ html, body, #root {
     font-size: 0.62rem;
   }
 
-  .project-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+  .project-list-item {
+    padding: 7px 4px;
+    gap: 10px;
   }
 
-  .project-thumb {
-    height: 60px;
+  .project-list-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
   }
 
-  .project-card-body {
-    padding: 6px 8px 8px;
+  .project-list-name {
+    font-size: 0.78rem;
   }
 
-  .project-card h3 {
-    font-size: 0.72rem;
-  }
-
-  .project-desc {
-    font-size: 0.62rem;
+  .project-list-desc {
+    font-size: 0.68rem;
   }
 
   .tech-tag {
@@ -888,7 +839,6 @@ html, body, #root {
     font-size: 0.75rem;
     gap: 4px;
   }
-  .tech-tag-icon { font-size: 0.8rem; }
 
   .blog-toc-entry { padding: 8px 0; }
   .blog-toc-chapter-name { font-size: 0.82rem; }
